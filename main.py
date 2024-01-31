@@ -172,6 +172,8 @@ class Water(pygame.sprite.Sprite):
         super().__init__(water_group)
         self.image = title_images['water']
         self.rect = self.image.get_rect().move(title_width * pos_x + 200, title_height * pos_y)
+        pole_play[(pos_x, pos_y)] = self
+        self.open = True
 
 
 # Класс клетки острова(При инициализации принимает тип поля при переворачивании клетки и координаты клетки:
