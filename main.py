@@ -53,7 +53,6 @@ def generate_level(level):
                 Land(x, y)
             elif level[y][x] == '%':
                 Grass(x, y)
-                Coin(x, y)
             if level[y][x] == '@':
                 MAP.board[y][x] = []
                 a = Boardred(x, y)
@@ -190,13 +189,23 @@ class Land(Cell):
         super().__init__()
         self.image = title_images['land']
         self.rect = self.image.get_rect().move(title_width * pos_x + 200, title_height * pos_y)
+        pole_play[(pos_x, pos_y)] = self
+        self.open = True
 
 
 class Grass(Cell):
     def __init__(self, pos_x, pos_y):
         super().__init__()
-        self.image = title_images['grass']
+        self.image = pygame.transform.scale(title_images['grass'], (50, 50))
         self.rect = self.image.get_rect().move(title_width * pos_x + 200, title_height * pos_y)
+        pole_play[(pos_x, pos_y)] = self
+        self.open = False
+
+    def open_cell(self, pos_x, pos_y):
+        name = random.choice(pole)
+        Pole(pos_x, pos_y, name)
+        pole.remove(name)
+        self.open = True
 
 
 class Coin(pygame.sprite.Sprite):
@@ -294,17 +303,19 @@ class Pirat(pygame.sprite.Sprite):
                 self.pos()
                 if MAP.board[b][a] != []:
                     MAP.board[b][a][0].pos()
-                if money:
-                    pos_of_coints[b][a] -= 1
-                    if pos_of_coints[b][a] == 0:
-                        coins_group.remove(coins_pos[(a, b)])
-                    if has_board(self.pos_x, self.pos_y)[0]:
-                        play.coints[play.player] += 1
-                    elif pos_of_coints[self.pos_y][self.pos_x] == 0:
-                        Coin(self.pos_x, self.pos_y)
-                    else:
-                        pos_of_coints[self.pos_y][self.pos_x] += 1
                 if krot:
+                    if money and pole_play[(x, y)].open:
+                        pos_of_coints[b][a] -= 1
+                        if pos_of_coints[b][a] == 0:
+                            coins_group.remove(coins_pos[(a, b)])
+                        if has_board(self.pos_x, self.pos_y)[0]:
+                            play.coints[play.player] += 1
+                        elif pos_of_coints[self.pos_y][self.pos_x] == 0:
+                            Coin(self.pos_x, self.pos_y)
+                        else:
+                            pos_of_coints[self.pos_y][self.pos_x] += 1
+                    if not pole_play[(x, y)].open:
+                        pole_play[(x, y)].open_cell(x, y)
                     play.play()
                 return True
         return False
@@ -374,6 +385,17 @@ class Tablo(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(a, b)
 
 
+class Pole(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y, name):
+        super().__init__(pole_group)
+        self.name = name
+        self.image = pygame.transform.scale(title_images[self.name], (50, 50))
+        self.rect = self.image.get_rect().move(title_width * pos_x + 200, title_height * pos_y)
+        if name == 'chest':
+            c = Coin(pos_x, pos_y)
+            n = random.randint(0, 2)
+            for _ in range(n):
+                pos_of_coints[pos_y][pos_x] += 1
 
 class Play:
     def __init__(self):
@@ -430,6 +452,7 @@ if __name__ == '__main__':
     pirat_group_red = pygame.sprite.Group()
     pirat_group_blue = pygame.sprite.Group()
     tablo_group = pygame.sprite.Group()
+    pole_group = pygame.sprite.Group()
 
     # Спрайты:
 
@@ -442,13 +465,23 @@ if __name__ == '__main__':
         'arrow': load_image('arrow.png'),
         'red_pirat': load_image('red_pirat.png', color_key=-1),
         'blue_pirat': load_image('blue_pirat.png', color_key=-1),
-        'coin': load_image('coin.png', color_key=-1)
+        'coin': load_image('coin.png', color_key=-1),
+        'fortress': load_image('fortress.png', color_key=-1),
+        'chest': load_image('chest.png', color_key=-1),
+        'ice': load_image('ice.png', color_key=-1),
+        'rum': load_image('rum.png', color_key=-1),
+        'trap': load_image('trap.png', color_key=-1),
+        'plain': load_image('plain.png', color_key=-1)
     }
 
     # Генерация уровня:
 
     pos_of_boards = {}
     pos_of_coints = [[0 for _ in range(map_x)] for _ in range(map_y)]
+    pole = [['plain' for _ in range(7)] * 2 + ['chest' for _ in range(7)] * 2 + ['ice' for _ in range(7)] + \
+            ['fortress' for _ in range(7)] + ['trap' for _ in range(7)]]
+    pole = pole[0]
+    pole_play = {}
     coins_pos = {}
     level_x, level_y, redboard, blueboard = generate_level(map_island)
 
@@ -548,6 +581,7 @@ if __name__ == '__main__':
         screen.fill(pygame.Color('black'))
         water_group.draw(screen)
         cell_group.draw(screen)
+        pole_group.draw(screen)
         board_group_red.draw(screen)
         board_group_blue.draw(screen)
         coins_group.draw(screen)
