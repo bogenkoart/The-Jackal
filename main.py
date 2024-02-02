@@ -8,8 +8,205 @@ import os
 
 
 def terminate():
+    return False
+
+
+def start_screen(width, height):
+    global in_screen
+    text = 'The Jackal'
+
+    fon = pygame.transform.scale(load_image('fon.png'), (width, height))
+    font = pygame.font.Font(None, 100)
+    start = Button(300, 70, pygame.Color('black'), pygame.Color('gray'))
+    exit = Button(300, 70, pygame.Color('black'), pygame.Color('gray'))
+    avtors = Button(300, 70, pygame.Color('black'), pygame.Color('gray'))
+    time = pygame.time.Clock()
+    string_rendered = font.render(text, 1, pygame.Color('black'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.y = 50
+    intro_rect.x = 325
+    run = True
+
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEMOTION:
+                cursor.update(event)
+                if pygame.mouse.get_focused():
+                    cursor.update(event)
+                    in_screen = True
+                else:
+                    in_screen = False
+        if not run:
+            pygame.quit()
+            sys.exit()
+        screen.fill(pygame.Color('black'))
+        screen.blit(fon, (0, 0))
+        screen.blit(string_rendered, intro_rect)
+        run = start.draw(360, 200, 'Играть', action=terminate, a=100, b=20)
+        if not run:
+            break
+        run = exit.draw(360, 300, 'Выйти', action=sys.exit, a=100, b=20)
+        avtors.draw(360, 400, 'Авторы', action=avtors_func, a=95, b=20)
+        if in_screen:
+            cursor.draw(screen)
+        pygame.display.flip()
+        time.tick(100)
+
+
+def avtors_func():
+    global in_screen
+    text = ["Авторы:", "",
+            "Программист - какой-то чел из параллели",
+            "Дизайнер - самый ужасный дезайнер",
+            "Мыслитель - Я", "",
+            "Артемий Боженко"]
+
+    font = pygame.font.Font(None, 50)
+    start = Button(200, 60, pygame.Color('gray'), pygame.Color('red'))
+    time = pygame.time.Clock()
+    run = True
+
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEMOTION:
+                cursor.update(event)
+                if pygame.mouse.get_focused():
+                    cursor.update(event)
+                    in_screen = True
+                else:
+                    in_screen = False
+        if not run:
+            pygame.quit()
+            sys.exit()
+        screen.fill(pygame.Color('black'))
+        text_coord = 50
+        for line in text:
+            string_rendered = font.render(line, 1, pygame.Color('white'))
+            intro_rect = string_rendered.get_rect()
+            text_coord += 10
+            intro_rect.top = text_coord
+            intro_rect.x = 10
+            text_coord += intro_rect.height
+            screen.blit(string_rendered, intro_rect)
+        run = start.draw(820, 30, 'Выйти', action=terminate, a=55, b=15)
+        if in_screen:
+            cursor.draw(screen)
+        pygame.display.flip()
+        time.tick(100)
+
+
+def pause():
+    global in_screen
+
+    text = 'Пауза'
+    pygame.mixer.music.pause()
+
+    font = pygame.font.Font(None, 100)
+    resume = Button(300, 70, pygame.Color('gray'), pygame.Color('green'))
+    restart = Button(300, 70, pygame.Color('gray'), pygame.Color('red'))
+    time = pygame.time.Clock()
+    string_rendered = font.render(text, 1, pygame.Color('red'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.y = 50
+    intro_rect.x = 400
+    paused = True
+
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                paused = False
+            if event.type == pygame.MOUSEMOTION:
+                if pygame.mouse.get_focused():
+                    cursor.update(event)
+                    in_screen = True
+                else:
+                    in_screen = False
+        if not paused:
+            pygame.quit()
+            sys.exit()
+        screen.fill(pygame.Color('black'))
+        paused = resume.draw(360, 200, 'Продолжить', action=terminate, a=60, b=20)
+        if not paused:
+            pygame.mixer.music.unpause()
+            break
+        paused = restart.draw(360, 300, 'Начать заново', action=restart_func, a=50, b=20)
+        screen.blit(string_rendered, intro_rect)
+        if in_screen:
+            cursor.draw(screen)
+        pygame.display.flip()
+        time.tick(100)
+
+
+def restart_func():
     pygame.quit()
-    sys.exit()
+    os.system('python main.py')
+    return False
+
+
+def resultat():
+    global in_screen
+
+    win = ''
+    lot = 0
+    red, blue = play.coints['red'], play.coints['blue']
+    if red == blue:
+        win = f'Ничья {red}:{blue}'
+        lot = 420
+    if red > blue:
+        win = f'Победил красный, со счётом {red}:{blue}'
+        lot = 320
+    if red < blue:
+        win = f'Победил синий, со счётом {blue}:{red}'
+        lot = 320
+
+    text = 'Игра окончена'
+    text1 = 'Результаты:'
+    text2 = f'{win}'
+    pygame.mixer.music.pause()
+
+    font = pygame.font.Font(None, 70)
+    restart = Button(300, 70, pygame.Color('gray'), pygame.Color('green'))
+    time = pygame.time.Clock()
+    string_rendered = font.render(text, 1, pygame.Color('green'))
+    string_rendered1 = font.render(text1, 1, pygame.Color('green'))
+    string_rendered2 = font.render(text2, 1, pygame.Color('green'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.y = 50
+    intro_rect.x = 360
+    intro_rect1 = string_rendered1.get_rect()
+    intro_rect1.y = 100
+    intro_rect1.x = 400
+    intro_rect2 = string_rendered2.get_rect()
+    intro_rect2.y = 150
+    intro_rect2.x = lot
+    paused = True
+
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                paused = False
+            if event.type == pygame.MOUSEMOTION:
+                if pygame.mouse.get_focused():
+                    cursor.update(event)
+                    in_screen = True
+                else:
+                    in_screen = False
+        if not paused:
+            pygame.quit()
+            sys.exit()
+        screen.fill(pygame.Color('black'))
+        paused = restart.draw(400, 300, 'Начать заново', action=restart_func, a=50, b=20)
+        screen.blit(string_rendered, intro_rect)
+        screen.blit(string_rendered1, intro_rect1)
+        screen.blit(string_rendered2, intro_rect2)
+        if in_screen:
+            cursor.draw(screen)
+        pygame.display.flip()
+        time.tick(100)
 
 
 # Функция распаковки уровня(На вход принимает имя файла с уровнем):
@@ -106,7 +303,6 @@ def account():
     screen.blit(text, (895, 85))
 
 
-
 # Класс для получения координаты клетки поля по клику(на вход получает ширину и длину поля):
 
 
@@ -169,6 +365,7 @@ class Water(pygame.sprite.Sprite):
 
     # Инициализатор класса (на вход принимает координаты клетки поля):
     def __init__(self, pos_x, pos_y):
+        self.pole = ''
         super().__init__(water_group)
         self.image = title_images['water']
         self.rect = self.image.get_rect().move(title_width * pos_x + 200, title_height * pos_y)
@@ -182,13 +379,11 @@ class Cell(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(cell_group)
 
-    def update(self):
-        pass
-
 
 class Land(Cell):
     def __init__(self, pos_x, pos_y):
         super().__init__()
+        self.pole = ''
         self.image = title_images['land']
         self.rect = self.image.get_rect().move(title_width * pos_x + 200, title_height * pos_y)
         pole_play[(pos_x, pos_y)] = self
@@ -198,6 +393,7 @@ class Land(Cell):
 class Grass(Cell):
     def __init__(self, pos_x, pos_y):
         super().__init__()
+        self.pole = ''
         self.image = pygame.transform.scale(title_images['grass'], (50, 50))
         self.rect = self.image.get_rect().move(title_width * pos_x + 200, title_height * pos_y)
         pole_play[(pos_x, pos_y)] = self
@@ -206,6 +402,7 @@ class Grass(Cell):
     def open_cell(self, pos_x, pos_y):
         name = random.choice(pole)
         Pole(pos_x, pos_y, name)
+        self.pole = name
         pole.remove(name)
         self.open = True
 
@@ -257,6 +454,7 @@ class Board(pygame.sprite.Sprite):
                     pos_of_boards['red_board'] = [self.pos_x, self.pos_y]
                 else:
                     pos_of_boards['blue_board'] = [self.pos_x, self.pos_y]
+                pygame.mixer.Sound.play(pirat_music)
                 play.play()
 
 
@@ -292,7 +490,9 @@ class Pirat(pygame.sprite.Sprite):
         x = pos[0]
         y = pos[1]
         delta = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
         for dx, dy in delta:
+
             if pos == (self.pos_x + dx, self.pos_y + dy) and MAP.board[y][x] != ['#'] and\
                     ee(x, y, self.__class__.__name__) and self.play == play.player:
                 self.die(x, y)
@@ -303,10 +503,24 @@ class Pirat(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect().move(
                     title_width * self.pos_x + 200, title_height * self.pos_y)
                 self.pos()
+
                 if MAP.board[b][a] != []:
                     MAP.board[b][a][0].pos()
+
                 if krot:
-                    if money and pole_play[(x, y)].open:
+                    k = True
+                    if not pole_play[(x, y)].open:
+                        pole_play[(x, y)].open_cell(x, y)
+                        k = False
+
+                    if pole_play[(x, y)].pole == 'ice':
+                        k = self.ice(dx, dy)
+                        pygame.mixer.Sound.play(ice_music)
+
+                    if pole_play[(x, y)].pole == 'fortress':
+                        k = False
+
+                    if money and pole_play[(x, y)].open and k:
                         pos_of_coints[b][a] -= 1
                         if pos_of_coints[b][a] == 0:
                             coins_group.remove(coins_pos[(a, b)])
@@ -316,8 +530,13 @@ class Pirat(pygame.sprite.Sprite):
                             Coin(self.pos_x, self.pos_y)
                         else:
                             pos_of_coints[self.pos_y][self.pos_x] += 1
-                    if not pole_play[(x, y)].open:
-                        pole_play[(x, y)].open_cell(x, y)
+
+                    if pole_play[(x, y)].pole == 'teleport':
+                        self.teleport(self.pos_x, self.pos_y)
+                        pygame.mixer.Sound.play(teleport_music)
+
+                    pygame.mixer.Sound.play(pirat_music)
+
                     play.play()
                 return True
         return False
@@ -330,14 +549,17 @@ class Pirat(pygame.sprite.Sprite):
                 k += 1
                 if i != self:
                     lot.append(i)
+
         if k == 1:
             self.rect = self.image.get_rect().move(
                 title_width * self.pos_x + 190, title_height * self.pos_y - 10)
+
         elif k == 2:
             self.rect = self.image.get_rect().move(
                 title_width * self.pos_x + 200, title_height * self.pos_y - 10)
             lot[0].rect = self.image.get_rect().move(
                 title_width * self.pos_x + 180, title_height * self.pos_y - 10)
+
         elif k == 3:
             self.rect = self.image.get_rect().move(
                 title_width * self.pos_x + 200, title_height * self.pos_y)
@@ -351,7 +573,9 @@ class Pirat(pygame.sprite.Sprite):
 
     def die(self, x, y):
         lot = []
+
         for i in MAP.board[y][x]:
+
             if i.group != MAP.board[self.pos_y][self.pos_x][0].group:
                 lot.append(i)
                 if i.group == pirat_group_red:
@@ -360,14 +584,66 @@ class Pirat(pygame.sprite.Sprite):
                     i.pos_x, i.pos_y = blueboard.pos_x, blueboard.pos_y
                 i.rect = i.image.get_rect().move(
                     title_width * i.pos_x, title_height * i.pos_y)
+
         for j in lot:
+
             if j.group == pirat_group_red:
                 MAP.board[y][x].remove(j)
                 MAP.board[redboard.pos_y][redboard.pos_x].append(j)
+
             else:
                 MAP.board[y][x].remove(j)
                 MAP.board[blueboard.pos_y][blueboard.pos_x].append(j)
             j.pos()
+
+    def teleport(self, x, y):
+        if self.group == pirat_group_red:
+            self.pos_x, self.pos_y = redboard.pos_x, redboard.pos_y
+        else:
+            self.pos_x, self.pos_y = blueboard.pos_x, blueboard.pos_y
+        MAP.board[self.pos_y][self.pos_x] += [MAP.board[y][x][0]]
+        MAP.board[y][x] = MAP.board[y][x][1:]
+        self.rect = self.image.get_rect().move(title_width * self.pos_x, title_height * self.pos_y)
+        self.pos()
+
+        if pos_of_coints[y][x] != 0:
+            pos_of_coints[y][x] -= 1
+            if pos_of_coints[y][x] == 0:
+                coins_group.remove(coins_pos[(x, y)])
+            if has_board(self.pos_x, self.pos_y)[0]:
+                play.coints[play.player] += 1
+            elif pos_of_coints[self.pos_y][self.pos_x] == 0:
+                Coin(self.pos_x, self.pos_y)
+            else:
+                pos_of_coints[self.pos_y][self.pos_x] += 1
+
+    def ice(self, dx, dy):
+        x = self.pos_x + dx
+        y = self.pos_y + dy
+        self.k = True
+        if MAP.board[y][x] != ['#'] and ee(x, y, self.__class__.__name__) and self.play == play.player:
+            self.die(x, y)
+            MAP.board[y][x] += [MAP.board[self.pos_y][self.pos_x][0]]
+            MAP.board[self.pos_y][self.pos_x] = MAP.board[self.pos_y][self.pos_x][1:]
+            a, b = self.pos_x, self.pos_y
+            self.pos_x, self.pos_y = x, y
+            self.rect = self.image.get_rect().move(
+                title_width * self.pos_x + 200, title_height * self.pos_y)
+            self.pos()
+
+            if MAP.board[b][a] != []:
+                MAP.board[b][a][0].pos()
+
+            if not pole_play[(x, y)].open:
+                pole_play[(x, y)].open_cell(x, y)
+                self.k = False
+            if pole_play[(x, y)].pole == 'teleport':
+                self.teleport(self.pos_x, self.pos_y)
+            if pole_play[(x, y)].pole == 'ice':
+                self.ice(dx, dy)
+            if pole_play[(x, y)].pole == 'fortress':
+                self.k = False
+        return self.k
 
 
 class Piratblue(Pirat):
@@ -396,8 +672,9 @@ class Pole(pygame.sprite.Sprite):
         if name == 'chest':
             c = Coin(pos_x, pos_y)
             n = random.randint(0, 2)
-            for _ in range(n):
+            for _ in range(0, n):
                 pos_of_coints[pos_y][pos_x] += 1
+
 
 class Play:
     def __init__(self):
@@ -423,94 +700,137 @@ class Play:
             self.pos1 = self.cords[self.k + 1]
         self.player = self.players[self.k]
 
+    def game_over(self):
+        res = True
+        for ele in pole_play:
+            if not pole_play[ele].open:
+                res = False
+                break
+        if res and len(coins_group) == 0:
+            pygame.time.delay(2000)
+            resultat()
 
-if __name__ == '__main__':
 
-    # Параметры клетки:
+class Button:
+    def __init__(self, width, height, inactive_color, active_color):
+        self.width = width
+        self.height = height
+        self.inactive_clr = inactive_color
+        self.active_clr = active_color
 
-    title_width = title_height = 50
+    def draw(self, x, y, message, action=None, a=0, b=0):
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
 
-    # Распаковка файла с уровнем:
+        if x < mouse[0] < x + self.width and y < mouse[1] < y + self.height:
+            pygame.draw.rect(screen, self.active_clr, (x, y, self.width, self.height))
 
-    map_island = load_level('map.txt')
-    map_x, map_y = len(map_island[0]), len(map_island)
-    MAP = Map(map_x, map_y)
+            if click[0] == 1 and action is not None:
+                pygame.mixer.Sound.play(pirat_music)
+                pygame.time.delay(100)
+                return action()
 
-    # Инициализация пайгейм:
+        else:
+            pygame.draw.rect(screen, self.inactive_clr, (x, y, self.width, self.height))
 
-    pygame.init()
-    pygame.font.init()
-    pygame.display.set_caption("The Jackal")
-    size = width, heigth = map_x * title_width + 400, map_y * title_height
-    screen = pygame.display.set_mode(size)
+        pygame.draw.rect(screen, pygame.Color('white'), (x, y, self.width, self.height), width=2)
+        font = pygame.font.Font(None, 40)
+        text = font.render(f"{message}", True, pygame.Color('white'))
+        screen.blit(text, (x + a, y + b))
+        return True
 
-    # Создание групп спрайтов:
 
-    water_group = pygame.sprite.Group()
-    cell_group = pygame.sprite.Group()
-    board_group_blue = pygame.sprite.Group()
-    board_group_red = pygame.sprite.Group()
-    coins_group = pygame.sprite.Group()
-    pirat_group_red = pygame.sprite.Group()
-    pirat_group_blue = pygame.sprite.Group()
-    tablo_group = pygame.sprite.Group()
-    pole_group = pygame.sprite.Group()
+# Параметры клетки:
 
-    # Спрайты:
+title_width = title_height = 50
 
-    title_images = {
-        'water': load_image('water2.png'),
-        'land': load_image('land3.png'),
-        'grass': load_image('grass.png'),
-        'red_board': load_image('red_board.png', color_key=-1),
-        'blue_board': load_image('blue_board.png', color_key=-1),
-        'arrow': load_image('arrow.png'),
-        'red_pirat': load_image('red_pirat.png', color_key=-1),
-        'blue_pirat': load_image('blue_pirat.png', color_key=-1),
-        'coin': load_image('coin.png', color_key=-1),
-        'fortress': load_image('fortress.png', color_key=-1),
-        'chest': load_image('chest.png', color_key=-1),
-        'ice': load_image('ice.png', color_key=-1),
-        'rum': load_image('rum.png', color_key=-1),
-        'trap': load_image('trap.png', color_key=-1),
-        'plain': load_image('plain.png', color_key=-1)
-    }
+# Распаковка файла с уровнем:
+map_island = load_level('map.txt')
+map_x, map_y = len(map_island[0]), len(map_island)
+MAP = Map(map_x, map_y)
 
-    # Генерация уровня:
+# Инициализация пайгейм:
+pygame.init()
+pygame.font.init()
+pygame.display.set_caption("The Jackal")
+size = width, heigth = map_x * title_width + 400, map_y * title_height
+screen = pygame.display.set_mode(size)
+pirat_music = pygame.mixer.Sound(os.path.join('data', 'pirat.wav'))
 
-    pos_of_boards = {}
-    pos_of_coints = [[0 for _ in range(map_x)] for _ in range(map_y)]
-    pole = [['plain' for _ in range(7)] * 2 + ['chest' for _ in range(7)] * 2 + ['ice' for _ in range(7)] + \
-            ['fortress' for _ in range(7)] + ['trap' for _ in range(7)]]
-    pole = pole[0]
-    pole_play = {}
-    coins_pos = {}
-    level_x, level_y, redboard, blueboard = generate_level(map_island)
+# Создание групп спрайтов:
+water_group = pygame.sprite.Group()
+cell_group = pygame.sprite.Group()
+board_group_blue = pygame.sprite.Group()
+board_group_red = pygame.sprite.Group()
+coins_group = pygame.sprite.Group()
+pirat_group_red = pygame.sprite.Group()
+pirat_group_blue = pygame.sprite.Group()
+tablo_group = pygame.sprite.Group()
+pole_group = pygame.sprite.Group()
+# Спрайты:
+title_images = {
+    'water': load_image('water2.png'),
+    'land': load_image('land3.png'),
+    'grass': load_image('grass.png'),
+    'red_board': load_image('red_board.png', color_key=-1),
+    'blue_board': load_image('blue_board.png', color_key=-1),
+    'arrow': load_image('arrow.png'),
+    'red_pirat': load_image('red_pirat.png', color_key=-1),
+    'blue_pirat': load_image('blue_pirat.png', color_key=-1),
+    'coin': load_image('coin.png', color_key=-1),
+    'fortress': load_image('fortress.png', color_key=-1),
+    'chest': load_image('chest.png', color_key=-1),
+    'ice': load_image('ice.png', color_key=-1),
+    'rum': load_image('rum.png', color_key=-1),
+    'trap': load_image('trap.png', color_key=-1),
+    'plain': load_image('plain.png', color_key=-1),
+    'teleport': load_image('teleport.png', color_key=-1)
+}
+pygame.mixer.music.load(os.path.join('data', 'pirat_music.mp3'))
+ice_music = pygame.mixer.Sound(os.path.join('data', 'ice.mp3'))
+button_music = pygame.mixer.Sound(os.path.join('data', 'button.wav'))
+teleport_music = pygame.mixer.Sound(os.path.join('data', 'teleport.mp3'))
+pygame.mixer.music.set_volume(0.1)
+pygame.mixer.music.play(-1)
 
-    # Курсор:
+# Генерация уровня:
+pos_of_boards = {}
+pos_of_coints = [[0 for _ in range(map_x)] for _ in range(map_y)]
+pole = [['plain' for _ in range(13)] * 2 + ['chest' for _ in range(4)] * 2 + ['ice' for _ in range(7)] + \
+        ['fortress' for _ in range(7)] + ['teleport' for _ in range(5)]]
+pole = pole[0]
+pole_play = {}
+coins_pos = {}
+level_x, level_y, redboard, blueboard = generate_level(map_island)
 
-    pygame.mouse.set_visible(False)
-    cursor = pygame.sprite.Group()
-    Cursor(cursor)
-    in_screen = True
+# Курсор:
+pygame.mouse.set_visible(False)
+cursor = pygame.sprite.Group()
+Cursor(cursor)
+in_screen = True
 
-    # Табло:
+# Табло:
+Tablo(5, 80)
+Tablo(855, 80)
+play = Play()
 
-    Tablo(5, 80)
-    Tablo(855, 80)
+# Обработчик событий:
 
-    # Обработчик событий:
+running = True
+button_pause = Button(50, 50, pygame.Color('black'), pygame.Color('gray'))
+clock = pygame.time.Clock()
+xod = False
+swi = False
+money = False
+color_of_board = ''
+xod_x = 0
+xod_y = 0
+a, b = 0, 0
+start_screen(width, heigth)
 
-    running = True
-    play = Play()
-    clock = pygame.time.Clock()
-    xod = False
-    swi = False
-    money = False
-    color_of_board = ''
-    xod_x = 0
-    xod_y = 0
-    a, b = 0, 0
+
+def play_game():
+    global running, button_pause, clock, xod, swi, money, color_of_board, xod_x, xod_y, a, b, in_screen
 
     while running:
         pos = ()
@@ -580,6 +900,9 @@ if __name__ == '__main__':
 
         # Обновление поля и его отрисовка:
 
+        if not running:
+            pygame.quit()
+            sys.exit()
         screen.fill(pygame.Color('black'))
         water_group.draw(screen)
         cell_group.draw(screen)
@@ -590,14 +913,15 @@ if __name__ == '__main__':
         pirat_group_red.draw(screen)
         pirat_group_blue.draw(screen)
         tablo_group.draw(screen)
+        button_pause.draw(500, 0, '| |', action=pause, a=13, b=10)
         for i in range(len(pos_of_coints)):
             for j in range(len(pos_of_coints[0])):
                 count(j, i, pos_of_coints[i][j])
         account()
         if xod and money:
-            pygame.draw.circle(screen, pygame.Color('green'), (a + 34, b + 34), 12, width=1)
+            pygame.draw.circle(screen, pygame.Color('green'), (a + 34, b + 34), 12, width=2)
         elif xod:
-            pygame.draw.circle(screen, pygame.Color('white'), (a + 34, b + 34), 12, width=1)
+            pygame.draw.circle(screen, pygame.Color('white'), (a + 34, b + 34), 12, width=2)
         if swi:
             pygame.draw.rect(screen, pygame.Color('white'), (a, b, title_width, title_height), width=1)
         pygame.draw.rect(screen, pygame.Color(play.player), (*play.pos, 200, 60))
@@ -605,9 +929,14 @@ if __name__ == '__main__':
         pygame.draw.rect(screen, pygame.Color('white'), (*play.pos1, 200, 60), width=2)
         if in_screen:
             cursor.draw(screen)
+        play.game_over()
         pygame.display.flip()
-        clock.tick(100)
+        clock.tick(200)
 
     # Закрытие приложения:
 
     pygame.quit()
+
+
+if __name__ == '__main__':
+    play_game()
